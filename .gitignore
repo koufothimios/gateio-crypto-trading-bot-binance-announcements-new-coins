@@ -18,3 +18,5 @@ auth/__pycache__/
 
 # Ignore config
 config.yml
+
+.idea

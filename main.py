@@ -1,6 +1,6 @@
 from trade_client import *
 from store_order import *
-from logger import logger
+from logger import *
 from load_config import *
 from new_listings_scraper import *
 
@@ -119,6 +119,7 @@ def main():
                             logger.info("Finish sell place_order")
 
                         logger.info(f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
+                        sendMessageToChannel(f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
 
                         # remove order from json file
                         order.pop(coin)
@@ -169,6 +170,7 @@ def main():
 
         if announcement_coin and announcement_coin not in order and announcement_coin not in sold_coins and announcement_coin not in old_coins:
             logger.info(f'New annoucement detected: {announcement_coin}')
+            sendMessageToChannel(f'New annoucement detected: {announcement_coin}')
 
             if supported_currencies is not False:
                 if announcement_coin in supported_currencies:
@@ -201,6 +203,7 @@ def main():
                             }
                             logger.info('PLACING TEST ORDER')
                             logger.debug(order[announcement_coin])
+                            sendMessageToChannel(f'test order price:{price} volume:{qty}')
                         # place a live order if False
                         else:
                             logger.info("starting buy place_order with : ",announcement_coin, pairing, qty,'buy', price)
@@ -222,12 +225,11 @@ def main():
                                   'listed on gate io')
             else:
                 get_all_currencies()
-        else:
+        #else:
+        #     logger.info(
+        #         "No coins announced, or coin has already been bought/sold. Checking more frequently in case TP and SL need updating")
 
-            logger.info(
-                "No coins announced, or coin has already been bought/sold. Checking more frequently in case TP and SL need updating")
-
-        time.sleep(3)
+        time.sleep(frequency)
         # except Exception as e:
         # print(e)
 

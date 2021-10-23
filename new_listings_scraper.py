@@ -5,6 +5,7 @@ import time
 import re
 
 import requests
+from load_config import *
 from gate_api import ApiClient, SpotApi
 
 from auth.gateio_auth import *
@@ -78,7 +79,7 @@ def search_and_update():
         logger.info("Checking for coin announcements every 1 minute (in a separate "
                    "thread)")
 
-        time.sleep(3)
+        time.sleep(load_config('config.yml')['TRADE_OPTIONS']['RUN_EVERY'])
 
 
 def get_all_currencies(single=False):

@@ -18,3 +18,7 @@
     # Logging levels used in this program are ERROR, INFO, and DEBUG
     LOG_LEVEL: INFO
     LOG_FILE: bot.log
+    ENABLE_STREAM: false
+    SLACK:
+        ENABLE: false
+        WEBHOOK_URL: ""
