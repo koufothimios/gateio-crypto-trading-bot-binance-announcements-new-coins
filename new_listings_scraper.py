@@ -5,12 +5,12 @@ import time
 import re
 
 import requests
-from load_config import *
 from gate_api import ApiClient, SpotApi
 
 from auth.gateio_auth import *
 from logger import logger
 from store_order import *
+from load_config import *
 
 client = load_gateio_creds('auth/auth.yml')
 spot_api = SpotApi(ApiClient(client))
@@ -22,7 +22,7 @@ def get_last_coin():
     Scrapes new listings page for and returns new Symbol when appropriate
     """
     logger.debug("Pulling announcement page")
-    latest_announcement = requests.get("https://www.binance.com/bapi/composite/v1/public/cms/article/catalog/list/query?catalogId=48&pageNo=1&pageSize=15")
+    latest_announcement = requests.get("https://www.binance.com/bapi/composite/v1/public/cms/article/catalog/list/query?catalogId=48&pageNo=1&pageSize=15&rnd=" + str(time.time()))
     latest_announcement = latest_announcement.json()
     logger.debug("Finished pulling announcement page")
     latest_announcement = latest_announcement['data']['articles'][0]['title']
@@ -73,13 +73,17 @@ def search_and_update():
     Pretty much our main func
     """
     while True:
-        latest_coin = get_last_coin()
-        if latest_coin:
-            store_new_listing(latest_coin)
-        logger.info("Checking for coin announcements every 1 minute (in a separate "
-                   "thread)")
-
         time.sleep(load_config('config.yml')['TRADE_OPTIONS']['RUN_EVERY'])
+        try:
+            latest_coin = get_last_coin()
+            if latest_coin:
+                store_new_listing(latest_coin)
+            logger.info("Checking for coin announcements every 1 minute (in a separate "
+                       "thread)")
+        except Exception as e:
+            logger.info(e)
+    else:
+        logger.info("while True loop in search_and_update has stopped.")
 
 
 def get_all_currencies(single=False):
