@@ -74,12 +74,12 @@ def main():
                 coin_sl = order[coin]['sl']
                 volume = order[coin]['volume']
                 symbol = order[coin]['symbol']
-                logger.debug('Data for sell:\r\n' + 'Coin Info: \r\n' + coin +
-                              '\r\nStored price: ' + stored_price + "\r\nCoin TP: " +
-                              coin_tp + '\r\nCoin SL: ' + coin_sl + '\r\nVolume: ' +
-                              volume + '\r\nSymbol: ' + symbol)
+                logger.debug('Data for sell:\r\n' + 'Coin Info: \r\n' + str(coin) +
+                              '\r\nStored price: ' + str(stored_price) + "\r\nCoin TP: " +
+                              str(coin_tp) + '\r\nCoin SL: ' + str(coin_sl) + '\r\nVolume: ' +
+                              str(volume) + '\r\nSymbol: ' + str(symbol))
 
-                logger.info("get_last_price existing coin: ", coin)
+                logger.info("get_last_price existing coin: "+str(coin))
                 last_price = get_last_price(symbol, pairing)
 
                 logger.info("Finished get_last_price")
