@@ -170,7 +170,7 @@ def main():
 
         if announcement_coin and announcement_coin not in order and announcement_coin not in sold_coins and announcement_coin not in old_coins:
             logger.info(f'New annoucement detected: {announcement_coin}')
-            sendMessageToChannel(f'New annoucement detected: {announcement_coin}')
+            #sendMessageToChannel(f'New annoucement detected: {announcement_coin}')
 
             if supported_currencies is not False:
                 if announcement_coin in supported_currencies:
