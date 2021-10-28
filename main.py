@@ -1,6 +1,6 @@
 from trade_client import *
 from store_order import *
-from logger import *
+from logger import logger
 from load_config import *
 from new_listings_scraper import *
 
@@ -10,9 +10,12 @@ import time
 import threading
 
 import json
-import os.path
+from json import JSONEncoder
 
-old_coins = ["CHESS","OTHERCRAP"]
+import os.path
+import sys, os
+
+old_coins = ["OTHERCRAP"]
 
 # loads local configuration
 config = load_config('config.yml')
@@ -55,7 +58,6 @@ def main():
     pairing = config['TRADE_OPTIONS']['PAIRING']
     qty = config['TRADE_OPTIONS']['QUANTITY']
     test_mode = config['TRADE_OPTIONS']['TEST']
-    frequency = config['TRADE_OPTIONS']['RUN_EVERY']
 
     t = threading.Thread(target=search_and_update)
     t.start()
@@ -69,17 +71,20 @@ def main():
         if len(order) > 0:
             for coin in list(order):
                 # store some necessary trade info for a sell
-                stored_price = float(order[coin]['price'])
                 coin_tp = order[coin]['tp']
                 coin_sl = order[coin]['sl']
-                volume = order[coin]['volume']
-                symbol = order[coin]['symbol']
-                logger.debug('Data for sell:\r\n' + 'Coin Info: \r\n' + str(coin) +
-                              '\r\nStored price: ' + str(stored_price) + "\r\nCoin TP: " +
-                              str(coin_tp) + '\r\nCoin SL: ' + str(coin_sl) + '\r\nVolume: ' +
-                              str(volume) + '\r\nSymbol: ' + str(symbol))
+                if not test_mode:
+                    volume = order[coin]['_amount']
+                    stored_price = float(order[coin]['_price'])
+                    symbol = order[coin]['_fee_currency']
+                else:
+                    volume = order[coin]['volume']
+                    stored_price = float(order[coin]['price'])
+                    symbol = order[coin]['symbol']
 
-                logger.info("get_last_price existing coin: "+str(coin))
+                logger.debug(f'Data for sell: {coin=} | {stored_price=} | {coin_tp=} | {coin_sl=} | {volume=} | {symbol=} ')
+
+                logger.info(f'get_last_price existing coin: {coin}')
                 last_price = get_last_price(symbol, pairing)
 
                 logger.info("Finished get_last_price")
@@ -113,13 +118,11 @@ def main():
                     try:
                         # sell for real if test mode is set to false
                         if not test_mode:
-                            logger.info("starting sell place_order with : ",symbol,
-                                      pairing, volume*99.5/100, 'sell', last_price)
-                            sell = place_order(symbol, pairing, volume*99.5/100, 'sell', last_price)
+                            logger.info(f'starting sell place_order with :{symbol} | {pairing} | {float(volume)*float(last_price)} | side=sell {last_price}')
+                            sell = place_order(symbol, pairing, float(volume)*float(last_price), 'sell', last_price)
                             logger.info("Finish sell place_order")
 
-                        logger.info(f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
-                        sendMessageToChannel(f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
+                        logger.info(f'sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL')
 
                         # remove order from json file
                         order.pop(coin)
@@ -133,6 +136,9 @@ def main():
                     else:
                         if not test_mode:
                             sold_coins[coin] = sell
+                            sold_coins[coin] = sell.__dict__
+                            sold_coins[coin].pop("local_vars_configuration")
+
                             store_order('sold.json', sold_coins)
                             logger.info('Order saved in sold.json')
                         else:
@@ -170,7 +176,6 @@ def main():
 
         if announcement_coin and announcement_coin not in order and announcement_coin not in sold_coins and announcement_coin not in old_coins:
             logger.info(f'New annoucement detected: {announcement_coin}')
-            #sendMessageToChannel(f'New annoucement detected: {announcement_coin}')
 
             if supported_currencies is not False:
                 if announcement_coin in supported_currencies:
@@ -203,33 +208,34 @@ def main():
                             }
                             logger.info('PLACING TEST ORDER')
                             logger.debug(order[announcement_coin])
-                            sendMessageToChannel(f'test order price:{price} volume:{qty}')
                         # place a live order if False
                         else:
-                            logger.info("starting buy place_order with : ",announcement_coin, pairing, qty,'buy', price)
+                            logger.info(f'starting buy place_order with : {announcement_coin=} | {pairing=} | {qty=} | side = buy | {price=}')
                             order[announcement_coin] = place_order(announcement_coin, pairing, qty,'buy', price)
+                            order[announcement_coin] = order[announcement_coin].__dict__
+                            order[announcement_coin].pop("local_vars_configuration")
                             order[announcement_coin]['tp'] = tp
                             order[announcement_coin]['sl'] = sl
-                            logger.info("Finished buy place_order")
+                            logger.info('Finished buy place_order')
 
                     except Exception as e:
                         logger.error(e)
 
                     else:
-                        logger.info(f"Order created with {qty} on {announcement_coin}")
+                        logger.info(f'Order created with {qty} on {announcement_coin}')
                         store_order('order.json', order)
                 else:
-                    logger.warning(f"Coin " + announcement_coin + " is not supported on gate io")
+                    logger.warning(f'{announcement_coin=} is not supported on gate io')
                     os.remove("new_listing.json")
                     logger.debug('Removed new_listing.json due to coin not being '
                                   'listed on gate io')
             else:
                 get_all_currencies()
-        #else:
-        #     logger.info(
-        #         "No coins announced, or coin has already been bought/sold. Checking more frequently in case TP and SL need updating")
+        else:
 
-        time.sleep(frequency)
+            logger.info( 'No coins announced, or coin has already been bought/sold. Checking more frequently in case TP and SL need updating')
+
+        time.sleep(3)
         # except Exception as e:
         # print(e)
 

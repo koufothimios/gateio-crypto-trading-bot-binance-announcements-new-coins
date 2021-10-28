@@ -20,3 +20,6 @@ auth/__pycache__/
 config.yml
 
 .idea
+# Ignore test file
+test_order.py
+
