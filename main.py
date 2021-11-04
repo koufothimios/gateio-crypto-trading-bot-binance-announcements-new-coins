@@ -1,6 +1,6 @@
 from trade_client import *
 from store_order import *
-from logger import logger
+from logger import logger, sendMessageToChannel
 from load_config import *
 from new_listings_scraper import *
 
@@ -73,6 +73,8 @@ def main():
                 # store some necessary trade info for a sell
                 coin_tp = order[coin]['tp']
                 coin_sl = order[coin]['sl']
+                coin_tp_price = order[coin]['tp_price']
+                coin_sl_price = order[coin]['sl_price']
                 if not test_mode:
                     volume = order[coin]['_amount']
                     stored_price = float(order[coin]['_price'])
@@ -89,7 +91,7 @@ def main():
 
                 logger.info("Finished get_last_price")
                 logger.info(f'{last_price=}')
-                logger.info(f'{stored_price + (stored_price*sl /100)=}')
+                #logger.info(f'{stored_price + (stored_price*sl /100)=}')
 
                 # update stop loss and take profit values if threshold is reached
                 if float(last_price) > stored_price + (
@@ -112,9 +114,7 @@ def main():
                                  f' {round(new_sl, 3)}')
 
                 # close trade if tsl is reached or trail option is not enabled
-                elif float(last_price) < stored_price + (
-                        stored_price * sl / 100) or float(last_price) > stored_price + (
-                        stored_price * coin_tp / 100) and not enable_tsl:
+                elif float(last_price) > coin_tp_price or float(last_price) < coin_sl_price and not enable_tsl:
                     try:
                         # sell for real if test mode is set to false
                         if not test_mode:
@@ -161,7 +161,7 @@ def main():
                                 'side': 'sell',
                                 'iceberg': '0',
                                 'price': last_price}
-                            logger.info('Sold coins:\r\n' + sold_coins[coin])
+                            logger.info('Sold coins:\r\n' + str(sold_coins[coin]))
 
                             store_order('sold.json', sold_coins)
 
@@ -195,6 +195,8 @@ def main():
                                 'time': datetime.timestamp(datetime.now()),
                                 'tp': tp,
                                 'sl': sl,
+                                'tp_price': float(price) * ((100+tp)/100),
+                                'sl_price': float(price) * ((100+sl)/100),
                                 'id': 'test-order',
                                 'text': 'test-order',
                                 'create_time': datetime.timestamp(datetime.now()),
@@ -216,12 +218,15 @@ def main():
                             order[announcement_coin].pop("local_vars_configuration")
                             order[announcement_coin]['tp'] = tp
                             order[announcement_coin]['sl'] = sl
+                            order[announcement_coin]['tp_price'] = float(price) * ((100+tp)/100)
+                            order[announcement_coin]['sl_price'] = float(price) * ((100+sl)/100)
                             logger.info('Finished buy place_order')
 
                     except Exception as e:
                         logger.error(e)
 
                     else:
+                        sendMessageToChannel("Order created with "+str(qty)+" on "+str(announcement_coin))
                         logger.info(f'Order created with {qty} on {announcement_coin}')
                         store_order('order.json', order)
                 else:
@@ -231,9 +236,8 @@ def main():
                                   'listed on gate io')
             else:
                 get_all_currencies()
-        else:
-
-            logger.info( 'No coins announced, or coin has already been bought/sold. Checking more frequently in case TP and SL need updating')
+        #else:
+            #logger.info( 'No coins announced, or coin has already been bought/sold. Checking more frequently in case TP and SL need updating')
 
         time.sleep(3)
         # except Exception as e:
