@@ -24,8 +24,9 @@ def get_last_coin():
     logger.debug("Pulling announcement page")
     latest_announcement = requests.get("https://www.binance.com/bapi/composite/v1/public/cms/article/catalog/list/query?catalogId=48&pageNo=1&pageSize=15&rnd=" + str(time.time()))
     latest_announcement = latest_announcement.json()
-    logger.debug("Finished pulling announcement page")
+    logger.info("Finished pulling announcement page")
     latest_announcement = latest_announcement['data']['articles'][0]['title']
+    print(latest_announcement)
     found_coin = re.findall('\(([^)]+)', latest_announcement)
     uppers = None
     
@@ -72,8 +73,7 @@ def search_and_update():
             latest_coin = get_last_coin()
             if latest_coin:
                 store_new_listing(latest_coin)
-            logger.info("Checking for coin announcements every 1 minute (in a separate "
-                       "thread)")
+            #logger.info("Checking for coin announcements every 1 minute (in a separate thread)")
         except Exception as e:
             logger.info(e)
     else:
