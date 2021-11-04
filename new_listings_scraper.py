@@ -26,7 +26,7 @@ def get_last_coin():
     latest_announcement = latest_announcement.json()
     logger.info("Finished pulling announcement page")
     latest_announcement = latest_announcement['data']['articles'][0]['title']
-    print(latest_announcement)
+    #print(latest_announcement)
     found_coin = re.findall('\(([^)]+)', latest_announcement)
     uppers = None
     

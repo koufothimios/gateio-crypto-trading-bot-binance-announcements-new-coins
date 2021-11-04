@@ -15,7 +15,7 @@ from json import JSONEncoder
 import os.path
 import sys, os
 
-old_coins = ["OTHERCRAP"]
+old_coins = ["OTHERCRAP","BNX"]
 
 # loads local configuration
 config = load_config('config.yml')
