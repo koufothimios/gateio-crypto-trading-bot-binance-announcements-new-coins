@@ -12,7 +12,7 @@
     TSL: -4
     TTP: 2
   SCRAPER:
-    ARTICLE_NO: 3
+    ARTICLE_NO: 0
   LOGGING:
     # Logging levels used in this program are ERROR, INFO, and DEBUG
     LOG_LEVEL: INFO
