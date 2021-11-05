@@ -121,7 +121,6 @@ def main():
                             logger.info(f'starting sell place_order with :{symbol} | {pairing} | {float(volume)*float(last_price)} | side=sell {last_price}')
                             sell = place_order(symbol, pairing, float(volume)*float(last_price), 'sell', last_price)
                             logger.info("Finish sell place_order")
-
                         logger.info(f'sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL')
 
                         # remove order from json file
@@ -176,7 +175,7 @@ def main():
 
         global supported_currencies
 
-        if announcement_coin and announcement_coin not in order and announcement_coin not in sold_coins and announcement_coin not in old_coins:
+        if announcement_coin not in order and announcement_coin not in sold_coins and announcement_coin not in old_coins:
             logger.info(f'New annoucement detected: {announcement_coin}')
 
             if supported_currencies is not False:
@@ -233,8 +232,9 @@ def main():
                         store_order('order.json', order)
                 else:
                     logger.warning(f'{announcement_coin=} is not supported on gate io')
-                    os.remove("new_listing.json")
-                    logger.debug('Removed new_listing.json due to coin not being '
+                    if os.path.isfile('new_listing.json'):
+                        os.remove("new_listing.json")
+                        logger.debug('Removed new_listing.json due to coin not being '
                                   'listed on gate io')
             else:
                 get_all_currencies()
