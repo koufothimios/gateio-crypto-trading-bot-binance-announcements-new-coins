@@ -15,7 +15,7 @@ from json import JSONEncoder
 import os.path
 import sys, os
 
-old_coins = ["OTHERCRAP","BNX"]
+old_coins = ["OTHERCRAP"]
 
 # loads local configuration
 config = load_config('config.yml')
@@ -227,7 +227,8 @@ def main():
                         logger.error(e)
 
                     else:
-                        sendMessageToChannel("Order created with "+str(qty)+" on "+str(announcement_coin)+" for: "+str(price))
+                        sendMessageToChannel('Bought coins:\r\n' + str(order[announcement_coin]))
+                        #sendMessageToChannel("Order created with "+str(qty)+" on "+str(announcement_coin)+" for: "+str(price))
                         logger.info(f'Order created with {qty} on {announcement_coin}')
                         store_order('order.json', order)
                 else:

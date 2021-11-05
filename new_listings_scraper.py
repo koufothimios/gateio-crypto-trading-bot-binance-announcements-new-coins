@@ -26,7 +26,7 @@ def get_last_coin():
     latest_announcement = requests.get("https://www.binance.com/bapi/composite/v1/public/cms/article/catalog/list/query?catalogId=48&pageNo=1&pageSize=15&rnd=" + str(time.time()))
     latest_announcement = latest_announcement.json()
     logger.debug("Finished pulling announcement page")
-    latest_announcement = latest_announcement['data']['articles'][0]['title']
+    latest_announcement = latest_announcement['data']['articles'][load_config('config.yml')['SCRAPER']['ARTICLE_NO']]['title']
     #print(latest_announcement)
     found_coin = re.findall('\(([^)]+)', latest_announcement)
 
