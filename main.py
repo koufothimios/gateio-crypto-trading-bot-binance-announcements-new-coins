@@ -163,6 +163,8 @@ def main():
                                 'price': last_price}
                             logger.info('Sold coins:\r\n' + str(sold_coins[coin]))
 
+                            sendMessageToChannel('Sold coins:\r\n' + str(sold_coins[coin]))
+
                             store_order('sold.json', sold_coins)
 
         # the buy block and logic pass
@@ -226,7 +228,7 @@ def main():
                         logger.error(e)
 
                     else:
-                        sendMessageToChannel("Order created with "+str(qty)+" on "+str(announcement_coin))
+                        sendMessageToChannel("Order created with "+str(qty)+" on "+str(announcement_coin)+" for: "+str(price))
                         logger.info(f'Order created with {qty} on {announcement_coin}')
                         store_order('order.json', order)
                 else:

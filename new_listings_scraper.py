@@ -24,7 +24,7 @@ def get_last_coin():
     logger.debug("Pulling announcement page")
     latest_announcement = requests.get("https://www.binance.com/bapi/composite/v1/public/cms/article/catalog/list/query?catalogId=48&pageNo=1&pageSize=15&rnd=" + str(time.time()))
     latest_announcement = latest_announcement.json()
-    logger.info("Finished pulling announcement page")
+    logger.debug("Finished pulling announcement page")
     latest_announcement = latest_announcement['data']['articles'][0]['title']
     #print(latest_announcement)
     found_coin = re.findall('\(([^)]+)', latest_announcement)
@@ -38,7 +38,7 @@ def get_last_coin():
             logger.info('New coin detected: ' + uppers)
         if len(found_coin) != 1:
             uppers = None
-    print(f'{uppers=}')
+    #print(f'{uppers=}')
     return uppers
 
 
